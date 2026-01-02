@@ -6,50 +6,57 @@ Created on Thu Jan  1 18:39:15 2026
 """
 
 import streamlit as st
-import pandas as pd
+from modulo_reservas import modulo_reservas
+from modulo_almacen import modulo_almacen
 
-# Configuración de la página
+# -------------------------------
+# 🎨 CONFIGURACIÓN DE LA PÁGINA
+# -------------------------------
 st.set_page_config(
-    page_title="Hotel Data Flow – Demo",
-    layout="wide"
+    page_title="Hotel Data Flow – Ecosistema",
+    layout="wide",
+    page_icon="🏨"
 )
 
-# Título principal
-st.title("🏨 Hotel Data Flow – Demo")
-st.subheader("Carga un archivo y visualiza tus datos hoteleros de forma sencilla")
+# -------------------------------
+# 🎨 ESTILOS PERSONALIZADOS
+# -------------------------------
+st.markdown("""
+<style>
+.main {
+    background-color: #F7F9FC;
+}
+h1, h2, h3 {
+    color: #1A3C57;
+}
+div[data-testid="metric-container"] {
+    background-color: #FFFFFF;
+    border: 1px solid #E0E6ED;
+    padding: 15px;
+    border-radius: 10px;
+}
+.streamlit-expanderHeader {
+    font-size: 18px;
+    color: #1A3C57;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
 
-st.write("Formatos aceptados: **CSV**")
+# -------------------------------
+# 🧭 MENÚ LATERAL
+# -------------------------------
+st.sidebar.title("📌 Navegación")
+opcion = st.sidebar.radio(
+    "Selecciona un módulo:",
+    ["📊 Reservas", "📦 Almacén"]
+)
 
-# Subida de archivo
-uploaded_file = st.file_uploader("📂 Sube tu archivo", type=["csv"])
+# -------------------------------
+# 🔀 RUTEO ENTRE MÓDULOS
+# -------------------------------
+if opcion == "📊 Reservas":
+    modulo_reservas()
 
-if uploaded_file is not None:
-
-    # Leer archivo
-    try:
-        df = pd.read_csv(uploaded_file)
-        st.success("Archivo cargado correctamente")
-    except Exception as e:
-        st.error(f"Error al leer el archivo: {e}")
-        st.stop()
-
-    # Información básica
-    st.write("### 📊 Información del dataset")
-    col1, col2 = st.columns(2)
-    col1.metric("Filas", df.shape[0])
-    col2.metric("Columnas", df.shape[1])
-
-    # Vista previa con scroll
-    st.write("### 👀 Vista previa del dataset")
-    st.dataframe(df, height=500)
-
-    # Logs del proceso
-    st.write("### 📝 Logs del proceso")
-    st.code(f"""
-[OK] Archivo cargado: {uploaded_file.name}
-[OK] Filas detectadas: {df.shape[0]}
-[OK] Columnas detectadas: {df.shape[1]}
-[OK] Vista previa generada correctamente
-    """)
-else:
-    st.info("Sube un archivo CSV para comenzar.")
+elif opcion == "📦 Almacén":
+    modulo_almacen()
