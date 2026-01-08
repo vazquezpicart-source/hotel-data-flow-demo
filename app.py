@@ -49,7 +49,8 @@ div[data-testid="metric-container"] {
 st.sidebar.title("📌 Navegación")
 opcion = st.sidebar.radio(
     "Selecciona un módulo:",
-    ["📊 Reservas", "📦 Almacén"]
+    ["📊 Reservas", "📦 Almacén", "📈 Marketing & Comercial"
+]
 )
 
 # -------------------------------
@@ -60,3 +61,5 @@ if opcion == "📊 Reservas":
 
 elif opcion == "📦 Almacén":
     modulo_almacen()
+elif opcion == "📈 Marketing & Comercial":
+    modulo_marketing()
