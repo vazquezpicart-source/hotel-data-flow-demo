@@ -9,6 +9,7 @@ import streamlit as st
 from modulo_reservas import modulo_reservas
 from modulo_almacen import modulo_almacen
 from modulo_marketing import modulo_marketing
+from modulo_habitaciones import modulo_habitaciones
 
 
 # -------------------------------
@@ -51,7 +52,8 @@ div[data-testid="metric-container"] {
 st.sidebar.title("📌 Navegación")
 opcion = st.sidebar.radio(
     "Selecciona un módulo:",
-    ["📊 Reservas", "📦 Almacén", "📈 Marketing & Comercial"
+    ["📊 Reservas", "📦 Almacén", "📈 Marketing & Comercial", "🛏️ Habitaciones"
+
 ]
 )
 
@@ -65,3 +67,5 @@ elif opcion == "📦 Almacén":
     modulo_almacen()
 elif opcion == "📈 Marketing & Comercial":
     modulo_marketing()
+elif opcion == "🛏️ Habitaciones":
+    modulo_habitaciones()
