@@ -8,6 +8,8 @@ Created on Thu Jan  1 18:39:15 2026
 import streamlit as st
 from modulo_reservas import modulo_reservas
 from modulo_almacen import modulo_almacen
+from modulo_marketing import modulo_marketing
+
 
 # -------------------------------
 # 🎨 CONFIGURACIÓN DE LA PÁGINA
