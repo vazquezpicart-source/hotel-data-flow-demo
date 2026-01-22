@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Hotel Data Flow – Ecosistema con CSV unificado
+Hotel Data Flow – App principal
 """
 
 import streamlit as st
 import pandas as pd
 
+from modulo_inicio import modulo_inicio
 from modulo_reservas import modulo_reservas
 from modulo_clientes import modulo_clientes
 from modulo_almacen import modulo_almacen
@@ -13,7 +14,16 @@ from modulo_marketing import modulo_marketing
 from modulo_habitaciones import modulo_habitaciones
 
 # ---------------------------------------------------------
-# 🧠 CARGA AUTOMÁTICA DEL CSV UNIFICADO + REPARACIÓN
+# CONFIGURACIÓN BÁSICA
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="Hotel Data Flow",
+    layout="wide",
+    page_icon="🏨"
+)
+
+# ---------------------------------------------------------
+# CARGA DEL CSV UNIFICADO
 # ---------------------------------------------------------
 COLUMNAS_OBLIGATORIAS = [
     "localizador","nombre","apellido1","apellido2","email","telefono",
@@ -28,9 +38,6 @@ def reparar_csv(df):
             df[col] = ""
     return df[COLUMNAS_OBLIGATORIAS]
 
-if "cliente_seleccionado" not in st.session_state:
-    st.session_state.cliente_seleccionado = None
-
 if "df_global" not in st.session_state:
     try:
         df = pd.read_csv("clientes_reservas.csv")
@@ -41,67 +48,43 @@ if "df_global" not in st.session_state:
         st.stop()
 
 # ---------------------------------------------------------
-# 🎨 CONFIGURACIÓN DE LA PÁGINA
+# CONTROL DE NAVEGACIÓN
 # ---------------------------------------------------------
-st.set_page_config(
-    page_title="Hotel Data Flow – Ecosistema",
-    layout="wide",
-    page_icon="🏨"
-)
+if "pagina" not in st.session_state:
+    st.session_state.pagina = "inicio"
 
-st.markdown("""
-<style>
-.main {
-    background-color: #F7F9FC;
-}
-h1, h2, h3 {
-    color: #1A3C57;
-}
-div[data-testid="metric-container"] {
-    background-color: #FFFFFF;
-    border: 1px solid #E0E6ED;
-    padding: 15px;
-    border-radius: 10px;
-}
-.streamlit-expanderHeader {
-    font-size: 18px;
-    color: #1A3C57;
-    font-weight: 600;
-}
-</style>
-""", unsafe_allow_html=True)
+# 🔵 Nueva API: leer parámetros desde la barra superior
+params = st.query_params
+
+if "pagina" in params:
+    st.session_state.pagina = params["pagina"]
+
+# Estado de ficha cliente
+if "cliente_seleccionado" not in st.session_state:
+    st.session_state.cliente_seleccionado = None
 
 # ---------------------------------------------------------
-# 🧭 MENÚ LATERAL
+# RUTEO ENTRE MÓDULOS
 # ---------------------------------------------------------
-st.sidebar.title("📌 Navegación")
-opcion = st.sidebar.radio(
-    "Selecciona un módulo:",
-    ["📊 Reservas", "👤 Clientes", "📦 Almacén", "📈 Marketing & Comercial", "🛏️ Habitaciones"]
-)
+pagina = st.session_state.pagina
 
-# ---------------------------------------------------------
-# 🔀 SI VIENE DESDE RESERVAS → ABRIR FICHA CLIENTE
-# ---------------------------------------------------------
-if st.session_state.cliente_seleccionado:
-    st.sidebar.warning("📌 Ficha del cliente abierta desde Reservas")
-    modulo_clientes(modo_popup=True)
-    st.stop()
+if pagina == "inicio":
+    modulo_inicio()
 
-# ---------------------------------------------------------
-# 🔀 RUTEO ENTRE MÓDULOS
-# ---------------------------------------------------------
-if opcion == "📊 Reservas":
+elif pagina == "reservas":
     modulo_reservas()
 
-elif opcion == "👤 Clientes":
-    modulo_clientes()
+elif pagina == "clientes":
+    if st.session_state.cliente_seleccionado:
+        modulo_clientes(modo_popup=True)
+    else:
+        modulo_clientes(modo_popup=False)
 
-elif opcion == "📦 Almacén":
+elif pagina == "almacen":
     modulo_almacen()
 
-elif opcion == "📈 Marketing & Comercial":
+elif pagina == "marketing":
     modulo_marketing()
 
-elif opcion == "🛏️ Habitaciones":
+elif pagina == "habitaciones":
     modulo_habitaciones()
