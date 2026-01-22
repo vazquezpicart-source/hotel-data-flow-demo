@@ -1,0 +1,4 @@
+localizador,nombre,apellido1,apellido2,email,telefono,pais,idioma,habitacion,estado,llegada,salida,noches,adultos,niños,tarifa,precio,segmento,canal,comentarios
+VIC/20260122/000001,Manel,Garcia,Perez,manel@example.com,682346879,España,ES,101,Confirmada,2026-01-22,2026-01-23,1,2,0,Web Flexible,100,Directo,Web Hotel,Botella de cava en la habitación
+VIC/20260125/000001,Ana,López,Ruiz,ana@example.com,612345678,España,ES,203,Confirmada,2026-01-25,2026-01-28,3,1,1,No Reembolsable,150,OTA,Booking,Cliente VIP habitual
+

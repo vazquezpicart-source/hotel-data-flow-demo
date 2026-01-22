@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan  2 17:46:59 2026
-
-@author: manel
+Módulo de Reservas – usando df_global
 """
 
 import streamlit as st
@@ -10,107 +8,52 @@ import pandas as pd
 
 def modulo_reservas():
 
-    # -------------------------------
-    # 🏨 HEADER
-    # -------------------------------
     st.title("📊 Módulo de Reservas")
-    st.caption("Carga, validación y análisis básico de reservas hoteleras")
+    st.caption("Análisis y gestión de reservas desde el CSV unificado")
+
+    df = st.session_state.df_global
+
+    # ---------------------------------------------------------
+    # LIMPIEZA DE DATOS: convertir columnas numéricas
+    # ---------------------------------------------------------
+    df["precio"] = pd.to_numeric(df["precio"], errors="coerce")
+    df["noches"] = pd.to_numeric(df["noches"], errors="coerce")
+    df["adultos"] = pd.to_numeric(df["adultos"], errors="coerce")
+    df["niños"] = pd.to_numeric(df["niños"], errors="coerce")
+
+    df["precio"].fillna(0, inplace=True)
+    df["noches"].fillna(0, inplace=True)
+    df["adultos"].fillna(0, inplace=True)
+    df["niños"].fillna(0, inplace=True)
 
     st.divider()
 
-    # -------------------------------
-    # 📂 SUBIDA DE ARCHIVO
-    # -------------------------------
-    with st.expander("📂 Cargar archivo de reservas (CSV)", expanded=True):
-        uploaded_file = st.file_uploader(
-            "Selecciona un archivo CSV de reservas",
-            type=["csv"],
-            key="reservas_uploader"
-        )
+    # ---------------------------------------------------------
+    # LISTADO DE RESERVAS
+    # ---------------------------------------------------------
+    st.subheader("🔎 Listado de reservas")
 
-    if uploaded_file is None:
-        st.info("Sube un archivo CSV para comenzar.")
-        return
+    for i, fila in df.iterrows():
+        with st.container(border=True):
+            st.write(f"📅 **Llegada:** {fila['llegada']}")
+            st.write(f"🏨 **Habitación:** {fila['habitacion']}")
+            st.write(f"💶 **Tarifa:** {fila['tarifa']} — {fila['precio']} €")
+            st.write(f"🌐 **Canal:** {fila['canal']}")
+            st.write(f"🧾 **Localizador:** {fila['localizador']}")
 
-    # -------------------------------
-    # 📥 LECTURA DEL ARCHIVO
-    # -------------------------------
-    try:
-        df = pd.read_csv(uploaded_file)
-        st.success("Archivo cargado correctamente")
-    except Exception as e:
-        st.error(f"Error al leer el archivo: {e}")
-        return
+            if st.button(f"👤 Ver ficha del cliente ({fila['localizador']})", key=f"cliente_{i}"):
+                st.session_state.cliente_seleccionado = fila["localizador"]
+                st.rerun()
 
-    # -------------------------------
-    # 🔍 VALIDACIÓN DE COLUMNAS
-    # -------------------------------
-    with st.expander("🔍 Validación de columnas", expanded=True):
+    # ---------------------------------------------------------
+    # ESTADÍSTICAS
+    # ---------------------------------------------------------
+    st.subheader("📈 Estadísticas")
 
-        columnas_obligatorias = ["fecha", "habitacion", "tarifa", "precio", "canal"]
-        columnas_faltantes = [col for col in columnas_obligatorias if col not in df.columns]
+    col1, col2, col3 = st.columns(3)
 
-        if columnas_faltantes:
-            st.error("❌ El archivo no contiene todas las columnas obligatorias.")
-            st.write("Columnas faltantes:")
-            st.write(columnas_faltantes)
+    col1.metric("ADR", f"{df['precio'].mean():.2f} €")
+    col2.metric("Noches totales", int(df["noches"].sum()))
+    col3.metric("Adultos totales", int(df["adultos"].sum()))
 
-            st.code(f"""
-[ERROR] Columnas obligatorias faltantes: {columnas_faltantes}
-[STOP] Proceso detenido por falta de estructura mínima.
-            """)
-            return
-        else:
-            st.success("✔ Todas las columnas obligatorias están presentes.")
-            st.code("[OK] Columnas obligatorias validadas correctamente.")
-
-    # -------------------------------
-    # 📊 ESTADÍSTICAS BÁSICAS
-    # -------------------------------
-    with st.expander("📈 Estadísticas del dataset", expanded=True):
-
-        colA, colB, colC = st.columns(3)
-
-        # Precio medio global (ADR)
-        precio_medio = df["precio"].mean()
-        colA.metric("💵 Precio medio global (ADR)", f"{precio_medio:.2f} €")
-
-        # ADR por tarifa
-        adr_por_tarifa = df.groupby("tarifa")["precio"].mean().round(2)
-        colB.write("**ADR por tarifa**")
-        colB.dataframe(adr_por_tarifa)
-
-        # Revenue por canal
-        revenue_por_canal = df.groupby("canal")["precio"].sum()
-        colC.write("**Revenue por canal**")
-        colC.dataframe(revenue_por_canal)
-
-    # -------------------------------
-    # 📊 GRÁFICO: REVENUE POR CANAL
-    # -------------------------------
-    with st.expander("📊 Gráfico: Revenue por canal", expanded=True):
-
-        chart_data = revenue_por_canal.reset_index()
-        chart_data.columns = ["canal", "revenue"]
-
-        st.bar_chart(chart_data, x="canal", y="revenue")
-
-    # -------------------------------
-    # 👀 VISTA PREVIA DEL DATASET
-    # -------------------------------
-    with st.expander("👀 Vista previa del dataset", expanded=False):
-        st.dataframe(df, height=500)
-
-    # -------------------------------
-    # 📝 LOGS
-    # -------------------------------
-    with st.expander("📝 Logs del proceso", expanded=False):
-        st.code(f"""
-[OK] Archivo cargado: {uploaded_file.name}
-[OK] Filas detectadas: {df.shape[0]}
-[OK] Columnas detectadas: {df.shape[1]}
-[OK] Validación de columnas completada
-[OK] Estadísticas calculadas correctamente
-[OK] Gráfico generado correctamente
-[OK] Vista previa generada correctamente
-        """)
+    st.bar_chart(df.groupby("canal")["precio"].sum())
